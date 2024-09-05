@@ -1,17 +1,16 @@
-import datetime
 import os.path
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
 
 
 from flask import Flask, jsonify, redirect
 from flask import request
 
+# scopes for the calendar api
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 app = Flask(__name__)
@@ -26,8 +25,9 @@ flow.redirect_uri = 'http://localhost:8080/oauth2callback'
 
 
 def verify_credentials(credentials, scopes):
+    """ Verifies the api"""
     if not credentials or not os.path.exists('token.json'):
-        return redirect('authorize')
+        return redirect('/authorize')
     if not credentials.valid:
         if credentials.expired and credentials.refresh_token:
             credentials.refresh(Request())
@@ -41,6 +41,7 @@ def index():
 
 @app.route('/authorize')
 def authorize():
+    # generates authorization url and redirects
     authorization_url, _ = flow.authorization_url(prompt='consent')
     return redirect(authorization_url), 302
 
@@ -63,7 +64,7 @@ def list_events():
         
         if token_verified := verify_credentials(credentials, SCOPES):
             service = build('calendar', 'v3', credentials=credentials)
-            events_result = service.calendarList().list(maxResults=10).execute()
+            events_result = service.events().list(calendarId='primary',maxResults=10).execute()
             events = events_result.get('items', [])
             return jsonify({"events": events})
         
@@ -71,9 +72,10 @@ def list_events():
         # redirecting to '/authorize'
         return redirect('/authorize'), 307
     
-    except Exception:
+    except Exception as e:
         # for any other exceptions
-        return jsonify({"error": "Something went wrong"}), 400
+        print(e)
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/calendar')
 def list_tasks():
@@ -84,14 +86,14 @@ def list_tasks():
         
         if token_verified := verify_credentials(credentials, SCOPES):
             service = build('calendar', 'v3', credentials=credentials)
-            events_result = service.calendarList().get(calendarId = 'calenderId').execute()
+            events_result = service.calendarList().get(calendarId = 'saisrinugampa135@gmail.com').execute()
             return jsonify({"events": events_result})
     
     except FileNotFoundError:
         # redirecting to /authorize
         return redirect('/authorize'), 307
-    except Exception:
-        return jsonify({"error": "Something went wrong"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route('/create_event')
