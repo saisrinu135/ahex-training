@@ -1,6 +1,11 @@
 env/
+venv/
 __pycache__/
 *.pyc
 .env
 db.sqlite3
 migrations/
+api-integration/
+
+client_secrets.json
+token.json
