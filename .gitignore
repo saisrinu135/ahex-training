@@ -9,3 +9,4 @@ api-integration/
 
 client_secrets.json
 token.json
+.vscode
