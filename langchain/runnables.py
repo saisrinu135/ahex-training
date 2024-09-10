@@ -1,8 +1,3 @@
-"""
-This module demonstrates the use of LangChain's Runnable classes to create a joke-generating AI.
-It utilizes OpenAI's ChatGPT model to produce jokes based on user-specified language and topic.
-"""
-
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableLambda, RunnableSequence
 from langchain_core.output_parsers import StrOutputParser

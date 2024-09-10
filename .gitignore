@@ -1,12 +1,23 @@
+# environments
 env/
 venv/
+
+# cahe
 __pycache__/
 *.pyc
+
+# environment variables (secrets)
 .env
+
+# databases
 db.sqlite3
 migrations/
-api-integration/
 
+
+# secret files
 client_secrets.json
 token.json
+
+# vs code settings
 .vscode
+settings.json
