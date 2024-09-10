@@ -1,42 +1,46 @@
+"""
+This module demonstrates the use of LangChain's Runnable classes to create a joke-generating AI.
+It utilizes OpenAI's ChatGPT model to produce jokes based on user-specified language and topic.
+"""
+
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableLambda, RunnableSequence
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-
 from dotenv import load_dotenv
 
-# loading environment variables
+# Load environment variables (e.g., API keys)
 load_dotenv()
 
-# initializing a chat model
-model = ChatOpenAI(model='gpt-3.5-turbo')
+# Initialize ChatGPT model
+chat_model = ChatOpenAI(model='gpt-3.5-turbo')
 
-# initializing a output parser
-parser = StrOutputParser()
+# Initialize string output parser
+string_parser = StrOutputParser()
 
-#messages
-messages = [
+# Define conversation template for joke generation
+joke_template = [
     ('system', 'You are a standup comedian in {language}'),
-    ('human', 'Tell me a joke on {topic}')
+    ('human', 'Tell me a joke about {topic}')
 ]
 
-# making propmts
-propmt = ChatPromptTemplate.from_messages(messages)
+# Create chat prompt template
+joke_prompt = ChatPromptTemplate.from_messages(joke_template)
 
+# Define individual runnables (tasks)
+format_prompt = RunnableLambda(lambda inputs: joke_prompt.format_messages(**inputs))
+generate_response = RunnableLambda(lambda messages: chat_model.invoke(messages))
+extract_content = RunnableLambda(lambda model_output: model_output.content)
 
+# Create a sequence of runnables for joke generation
+joke_generator = RunnableSequence(
+    first=format_prompt,
+    middle=[generate_response],
+    last=extract_content
+)
 
-# initializing a runnalble (runnables are just like small tasks)
-make_propmt = RunnableLambda(lambda x: propmt.format_messages(**x))
-invoke_model = RunnableLambda(lambda x: model.invoke(x))
-parse_output = RunnableLambda(lambda x: x.content)
+# Generate a joke with specific language and topic
+generated_joke = joke_generator.invoke({'language': 'English', 'topic': 'office'})
 
-
-# connecting runnables (runnables sequence is sequence os tasks)
-chain = RunnableSequence(first=make_propmt, middle=[invoke_model], last=parse_output)
-
-
-# invoking tha chain
-response = chain.invoke({'language': 'English', 'topic': 'office'})
-
-# printing the response
-print(response)
+# Display the generated joke
+print(generated_joke)
