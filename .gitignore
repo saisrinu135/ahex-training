@@ -21,3 +21,6 @@ token.json
 # vs code settings
 .vscode
 settings.json
+
+pdfs/
+chroma_db/
